@@ -1,5 +1,6 @@
 Vagrant.configure("2") do |config|
     config.env.enable              # Habilitamos vagrant-env(.env)
+    config.vm.boot_timeout = 600 #Se añadió más tiempo 10 min
 
     if ENV['TESTS'] == 'true'
         config.vm.define "test" do |testing|
