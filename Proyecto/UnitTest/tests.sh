@@ -3,50 +3,49 @@
 # VM
 function unit_tests_on_vm()
 {
-    local VAGRANT_CMD=$(which vagrant)
+    local VAGRANT_CMD="$(which vagrant)"
 
     if [[ "$VAGRANT_CMD" == "" ]]; then
-        echo "No se encontro Vagrant"
+        echo "No se encontró Vagrant"
         exit 1
     fi
 
-    export TESTS=true
+    export TESTS="true"
 
     echo -e "\n\033[1;32m########## UnitTest en VM ##########\033[0m"
 
-    $VAGRANT_CMD up
+    "$VAGRANT_CMD" up
 
     # Test
-    $VAGRANT_CMD ssh -c "cd /vagrant/cookbooks/database && chef exec rspec --format=documentation"
-    $VAGRANT_CMD ssh -c "cd /vagrant/cookbooks/wordpress && chef exec rspec --format=documentation"
-    $VAGRANT_CMD ssh -c "cd /vagrant/cookbooks/proxy && chef exec rspec --format=documentation"
+    "$VAGRANT_CMD" ssh -c "cd /vagrant/cookbooks/database && chef exec rspec --format=documentation"
+    "$VAGRANT_CMD" ssh -c "cd /vagrant/cookbooks/wordpress && chef exec rspec --format=documentation"
+    "$VAGRANT_CMD" ssh -c "cd /vagrant/cookbooks/proxy && chef exec rspec --format=documentation"
 
     # Destroy VM
-    $VAGRANT_CMD destroy -f test
+    "$VAGRANT_CMD" destroy -f test
 
     unset TESTS
 
     echo -e "\n\033[1;32m########## Fin UnitTest en VM ##########\033[0m\n\n"
-
 }
 
 # Docker Valid
-function run_tests_on_a_conatiner()
+function run_tests_on_a_container()
 {
-    local DOCKER_CMD=$(which docker)
+    local DOCKER_CMD="$(which docker)"
     local DOCKER_IMAGE="cppmx/chefdk:latest"
     local TEST_CMD="chef exec rspec --format=documentation"
 
     if [[ "$DOCKER_CMD" == "" ]]; then
-        echo "No se encontro docker"
+        echo "No se encontró docker"
         exit 1
     fi
 
-    $DOCKER_CMD run --rm -v $1:/cookbooks $DOCKER_IMAGE $TEST_CMD
+    "$DOCKER_CMD" run --rm -v $1:/cookbooks $DOCKER_IMAGE $TEST_CMD
 }
 
 # Docker
-function unit_tests_on_a_conatiner()
+function unit_tests_on_a_container()
 {
     local DATABASE="$(pwd)/cookbooks/database"
     local WORDPRESS="$(pwd)/cookbooks/wordpress"
@@ -55,13 +54,13 @@ function unit_tests_on_a_conatiner()
     echo -e "\n\033[1;32m########## UnitTest en Docker ##########\033[0m"
 
     echo "Probando las recetas de Database"
-    run_tests_on_a_conatiner $DATABASE
+    run_tests_on_a_container $DATABASE
 
     echo "Probando las recetas de Wordpress"
-    run_tests_on_a_conatiner $WORDPRESS
+    run_tests_on_a_container $WORDPRESS
 
     echo "Probando las recetas de Proxy"
-    run_tests_on_a_conatiner $PROXY
+    run_tests_on_a_container $PROXY
 
     echo -e "\n\033[1;32m########## Fin UnitTest en Docker ##########\033[0m\n\n"
 
@@ -69,19 +68,19 @@ function unit_tests_on_a_conatiner()
 
 function itg_tests()
 {
-    local KITCHEN_CMD=$(which kitchen)
+    local KITCHEN_CMD="$(which kitchen)"
 
-    cd $1
-    $KITCHEN_CMD test
+    cd "$1"
+    "$KITCHEN_CMD" test
 }
 
 function all_itg_tests()
 {
-    local COOKBOOKS=$(pwd)/cookbooks
+    local COOKBOOKS="$(pwd)/cookbooks"
 
-    itg_tests $COOKBOOKS/database
-    itg_tests $COOKBOOKS/wordpress
-    itg_tests $COOKBOOKS/proxy
+    itg_tests "$COOKBOOKS/database"
+    itg_tests "$COOKBOOKS/wordpress"
+    itg_tests "$COOKBOOKS/proxy"
 }
 
 function manual()
@@ -97,7 +96,7 @@ function manual()
     # Llamada según opción elegida
     case $OPTION in
         1) unit_tests_on_vm ;;
-        2) unit_tests_on_a_conatiner ;;
+        2) unit_tests_on_a_container ;;
         3) all_itg_tests ;;
         4) echo -e "\033[1;31mBye bye... \n\033[0m" && exit 0 ;;
         *) echo -e "\033[1;31mLa opción es inválida. Saliendo... \n\033[0m" ;;
@@ -109,13 +108,13 @@ if [[ "$1" == "" ]]; then
 elif [[ "$1" == "vm" ]]; then
     unit_tests_on_vm
 elif [[ "$1" == "docker" ]]; then
-    unit_tests_on_a_conatiner
+    unit_tests_on_a_container
 elif [[ "$1" == "database" ]]; then
-    itg_tests $(pwd)/cookbooks/database
+    itg_tests "$(pwd)/cookbooks/database"
 elif [[ "$1" == "wordpress" ]]; then
-    itg_tests $(pwd)/cookbooks/wordpress
+    itg_tests "$(pwd)/cookbooks/wordpress"
 elif [[ "$1" == "proxy" ]]; then
-    itg_tests $(pwd)/cookbooks/proxy
+    itg_tests "$(pwd)/cookbooks/proxy"
 else
     echo "Opción inválida"
     exit 1

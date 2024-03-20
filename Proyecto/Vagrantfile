@@ -1,8 +1,14 @@
 Vagrant.configure("2") do |config|
     config.env.enable              # Habilitamos vagrant-env(.env)
-    config.vm.boot_timeout = 600 #Se añadió más tiempo 10 min
+    config.vm.boot_timeout = 600 #Se añadió más tiempo 10 min.
+
+        # Montar las carpetas locales en la máquina virtual
+        config.vm.synced_folder "cookbooks/database", "/vagrant/cookbooks/database"
+        config.vm.synced_folder "cookbooks/wordpress", "/vagrant/cookbooks/wordpress"
+        config.vm.synced_folder "cookbooks/proxy", "/vagrant/cookbooks/proxy"
 
     if ENV['TESTS'] == 'true'
+        puts "Ingresó al bloque if para definir la máquina virtual 'test'"
         config.vm.define "test" do |testing|
             testing.vm.box = ENV["BOX_NAME"] || "ubuntu/focal64"  # Utilizamos una imagen de Ubuntu 20.04 por defecto
 
@@ -19,7 +25,7 @@ Vagrant.configure("2") do |config|
 
                 chown -R vagrant:vagrant /opt/chefdk
             SHELL
-        end
+    end
     else
         config.vm.define "database" do |db|
             db.vm.box = ENV["BOX_NAME"] || "ubuntu/focal64"  # Utilizamos una imagen de Ubuntu 20.04 por defecto
